@@ -33,17 +33,17 @@ public class Server {
         try{
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 10)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline p = ch.pipeline();
-                            /* TODO add Pipeline ChannelHandlers*/
-//                            p.addLast();
-                        }
-                    });
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 10)
+                .handler(new LoggingHandler(LogLevel.INFO))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline p = ch.pipeline();
+                        /* TODO add Pipeline ChannelHandlers*/
+                        p.addLast();
+                    }
+                });
             ChannelFuture f = b.bind(PORT).sync();
             f.channel().closeFuture().sync();
         } finally {
