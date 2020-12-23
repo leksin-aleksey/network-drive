@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 public class ServerProperties extends Properties{
-    private static final Path resourcesPath = Paths.get("org.geekbrains.networkstorage.server.Server", "resources", "server.properties");
+    private static final Path resourcesPath = Paths.get("Server", "resources", "server.properties");
 
     private static Properties properties = new Properties();
 

@@ -1,39 +1,55 @@
 package org.geekbrains.networkstorage.server;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.geekbrains.networkstorage.client.ClientHandler;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.Properties;
 
 public class Server {
-    private final Properties serverProperties;
+    private final Properties SERVER_PROPERTIES;
+    private final int PORT;
 
-    public Server() {
-        serverProperties = ServerProperties.getServerProperties();
+    public Server(){
+        SERVER_PROPERTIES = ServerProperties.getServerProperties();
+        PORT = Integer.parseInt(SERVER_PROPERTIES.getProperty("server.network.port"));
 
-        start(serverProperties);
-    }
-
-    private void start(Properties properties){
-        System.out.println(properties.getProperty("server.port"));
-        System.out.println(1);
-        try (ServerSocket socket = new ServerSocket((int) properties.get("server.network.port"))){
-            clientListener(socket);
-        } catch (IOException e){
-            /* TODO logging */
+        try {
+            start();
+        } catch (InterruptedException e) {
+            /* TODO log */
+            e.printStackTrace();
         }
     }
 
-    private void clientListener(ServerSocket socket){
-        while (true){
-            try {
-                Socket client = socket.accept();
-                new ClientHandler(client);
-            } catch (IOException e){
-                /* TODO logging */
-            }
+    private void start() throws InterruptedException{
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+
+        try{
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 10)
+                .handler(new LoggingHandler(LogLevel.INFO))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline p = ch.pipeline();
+                        /* TODO add Pipeline ChannelHandlers*/
+                        p.addLast(new ClientHandler());
+                    }
+                });
+            ChannelFuture f = b.bind(PORT).sync();
+            f.channel().closeFuture().sync();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
         }
     }
 }
