@@ -7,6 +7,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import org.geekbrains.networkstorage.client.ClientHandler;
 
 import java.util.Properties;
 
@@ -41,7 +42,7 @@ public class Server {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         /* TODO add Pipeline ChannelHandlers*/
-                        p.addLast();
+                        p.addLast(new ClientHandler());
                     }
                 });
             ChannelFuture f = b.bind(PORT).sync();
