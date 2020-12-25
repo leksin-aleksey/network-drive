@@ -1,6 +1,8 @@
 package org.geekbrains.networkstorage.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -11,10 +13,14 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
+import org.geekbrains.networkstorage.handlers.AuthDecoder;
 import org.geekbrains.networkstorage.handlers.CommandHandler;
 import org.geekbrains.networkstorage.handlers.UserAuthHandler;
+import org.geekbrains.networkstorage.user.User;
 
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
     public final static AttributeKey<Boolean> AUTH = AttributeKey.valueOf("auth");
@@ -35,6 +41,8 @@ public class Server {
     }
 
     private void start() throws InterruptedException{
+        Set<User> connectedUsers = ConcurrentHashMap.newKeySet();
+
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -49,14 +57,20 @@ public class Server {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-                        p.addLast(new StringDecoder(CharsetUtil.UTF_8));
-                        p.addLast(new StringEncoder(CharsetUtil.UTF_8));
-                        p.addLast(new UserAuthHandler());
-                        p.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-                        p.addLast(new StringDecoder(CharsetUtil.UTF_8));
-                        p.addLast(new StringEncoder(CharsetUtil.UTF_8));
-                        /* TODO add Pipeline ChannelHandlers*/
-                        p.addLast(new CommandHandler());
+                        p.addLast(new AuthDecoder());
+                        p.addLast(new UserAuthHandler(connectedUsers));
+
+
+
+
+//                        p.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+//                        p.addLast(new StringDecoder(CharsetUtil.UTF_8));
+//                        p.addLast(new StringEncoder(CharsetUtil.UTF_8));
+//                        p.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+//                        p.addLast(new StringDecoder(CharsetUtil.UTF_8));
+//                        p.addLast(new StringEncoder(CharsetUtil.UTF_8));
+//                        /* TODO add Pipeline ChannelHandlers*/
+//                        p.addLast(new CommandHandler());
                     }
                 });
             ChannelFuture f = b.bind(PORT).sync();

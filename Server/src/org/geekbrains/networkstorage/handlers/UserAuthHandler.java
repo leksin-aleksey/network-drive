@@ -3,9 +3,18 @@ package org.geekbrains.networkstorage.handlers;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.geekbrains.networkstorage.server.Server;
+import org.geekbrains.networkstorage.user.User;
+import org.geekbrains.networkstorage.user.UserAuth;
+
+import java.util.Set;
 
 
-public class UserAuthHandler extends SimpleChannelInboundHandler<String> {
+public class UserAuthHandler extends SimpleChannelInboundHandler<UserAuth> {
+    private final Set<User> connectedUsers;
+
+    public UserAuthHandler(Set<User> connectedUsers) {
+        this.connectedUsers = connectedUsers;
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -14,13 +23,17 @@ public class UserAuthHandler extends SimpleChannelInboundHandler<String> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-        System.out.println("*UserAuthHandler");
+    protected void channelRead0(ChannelHandlerContext ctx, UserAuth msg) throws Exception {
         Boolean isAuth = ctx.channel().attr(Server.AUTH).get();
+
         if (isAuth == null || !isAuth.equals(Boolean.TRUE)) {
-            /* TODO login User */
-            System.out.println(msg);
-            ctx.channel().attr(Server.AUTH).set(Boolean.TRUE);
+
+            User newUser = msg.authenticate();
+            if (newUser != null) {
+                System.out.println(msg.getLogin());
+                ctx.channel().attr(Server.AUTH).set(Boolean.TRUE);
+                connectedUsers.add(newUser);
+            }
             ctx.fireChannelReadComplete();
         } else {
             ctx.fireChannelRead(msg);
