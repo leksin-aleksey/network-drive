@@ -1,11 +1,14 @@
-package com.geekbrains.networkstorage.command.commands;
+package com.geekbrains.networkstorage.commands;
 
-import com.geekbrains.networkstorage.command.datas.CommandData;
-import com.geekbrains.networkstorage.command.metas.CommandMeta;
-import com.geekbrains.networkstorage.command.metas.ConnectMeta;
+import com.geekbrains.networkstorage.data.CommandData;
+import com.geekbrains.networkstorage.data.ConnectData;
+import com.geekbrains.networkstorage.meta.CommandMeta;
+import com.geekbrains.networkstorage.meta.ConnectMeta;
+
 
 public class ConnectCommand extends Command{
     private CommandMeta meta;
+    private CommandData data;
 
     public ConnectCommand(CommandMeta meta) {
         this.meta = meta;
@@ -13,6 +16,7 @@ public class ConnectCommand extends Command{
 
     public ConnectCommand(String[] params){
         meta = new ConnectMeta(params[1], params[2]);
+        data = new ConnectData();
     }
 
     public ConnectCommand(String username, String password){
@@ -26,6 +30,6 @@ public class ConnectCommand extends Command{
 
     @Override
     public CommandData getData() {
-        return null;
+        return data;
     }
 }

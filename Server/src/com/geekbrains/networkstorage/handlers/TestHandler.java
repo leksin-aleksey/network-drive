@@ -15,15 +15,12 @@ public class TestHandler extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        System.out.println(in.toString());
         int metaLength = -1;
         String meta;
-//        long dataLength = -1;
-//        byte[] data;
+        long dataLength = -1;
 
         if (in.readableBytes() >= 4){
             metaLength = in.readInt();
-            System.out.println(metaLength);
         }
         if (in.readableBytes() >= metaLength){
             meta = in.readCharSequence(metaLength, StandardCharsets.UTF_8).toString();
@@ -32,10 +29,10 @@ public class TestHandler extends ByteToMessageDecoder {
 //        ctx.fireChannelReadComplete();
 
 
-//        if (in.readableBytes() >= 8){
-//            dataLength = in.readInt();
-//            System.out.println(dataLength);
-//        }
+        if (in.readableBytes() >= 8){
+            dataLength = in.readLong();
+            System.out.println(dataLength);
+        }
 //        data = new byte[dataLength];
 //        if (in.readableBytes() >= dataLength){
 //            for (int i = 0; i < dataLength; i++) {

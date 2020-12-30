@@ -1,4 +1,7 @@
-package com.geekbrains.networkstorage.command.metas;
+package com.geekbrains.networkstorage.meta;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.Map;
 
@@ -18,19 +21,16 @@ public class ConnectMeta extends CommandMeta {
         this.password = password;
     }
 
-//    public String getUsername() {
-//        return username;
-//    }
-
-
     @Override
     public String getCommandName() {
         return "connect";
     }
 
     @Override
-    public byte[] encodeMeta() {
+    public ByteBuf encode() {
+        ByteBuf buf = Unpooled.buffer();
         String metaEncoded = getCommandName() + " " + username + " " + password;
-        return metaEncoded.getBytes();
+        buf.writeBytes(metaEncoded.getBytes());
+        return buf;
     }
 }

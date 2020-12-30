@@ -1,4 +1,4 @@
-package com.geekbrains.networkstorage.command.commands;
+package com.geekbrains.networkstorage.commands;
 
 public class CommandFactory {
     private CommandFactory() {
